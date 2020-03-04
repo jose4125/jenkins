@@ -1,0 +1,45 @@
+pipeline{
+    agent{
+        label "node"
+    }
+    stages{
+        stage("build"){
+            steps{
+                echo "========executing A========"
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "========A executed successfully========"
+                }
+                failure{
+                    echo "========A execution failed========"
+                }
+            }
+        }
+        stage("test") {
+          steps {
+            println('A test has failed!')
+            sh 'exit 1'
+          }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+        }
+        failure{
+            echo "========pipeline execution failed========"
+            emailext (
+              subject: "FAILED: Job '${env.JOB_NAME} - Build [#${env.BUILD_NUMBER}] ${currentBuild.result}'",
+              body: '${JELLY_SCRIPT,template="html"}',
+              recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+            )
+        }
+    }
+}
