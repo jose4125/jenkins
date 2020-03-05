@@ -1,0 +1,41 @@
+pipeline{
+    agent any
+    stages{
+        stage("build"){
+            steps{
+                echo "========executing A========"
+                slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "========A executed successfully========"
+                }
+                failure{
+                    echo "========A execution failed========"
+                }
+            }
+        }
+        stage("test") {
+          steps {
+            println('A test has failed!')
+            sh 'exit 1'
+          }
+        }
+    }
+    post{
+        always{
+            echo "========always========"
+        }
+        success{
+            echo "========pipeline executed successfully ========"
+            slackSend (color: '#00FF00', message: "SUCCESSFUL: job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+        failure{
+            echo "========pipeline execution failed========"
+            slackSend (color: '#FF0000', message: "FAILED: job '${env.JOB_NAME} [#${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+    }
+}
